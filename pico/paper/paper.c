@@ -13,10 +13,141 @@ int main()
     QRCode qrcode;
 
     // Allocate a chunk of memory to store the QR code
-    uint8_t qrcodeBytes[512];
+    uint8_t qrcodeBytes[qrcode_getBufferSize(11)];
 
-    qrcode_initText(&qrcode, qrcodeBytes, 3, ECC_LOW, "https://benjaminbenben.com?q=123456789012345678901234567890123456789012345678901234567890");
+    // height = 122
 
+    // type 11 @ LOW = 61x61, 468 chars
+
+    qrcode_initText(&qrcode, qrcodeBytes, 11, ECC_LOW, "https://benjaminbenben.com?q=123456789012345678901234567890123456789012345678901234567890");
+
+    printf("EPD_2IN13_V2_test Demo\r\n");
+    if (DEV_Module_Init() != 0)
+    {
+        return -1;
+    }
+
+    printf("e-Paper Init and Clear...\r\n");
+    EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
+    EPD_2IN13_V2_Clear();
+    DEV_Delay_ms(500);
+
+    // Create a new image cache
+    UBYTE *BlackImage;
+    /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
+    UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0) ? (EPD_2IN13_V2_WIDTH / 8) : (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
+    if ((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL)
+    {
+        printf("Failed to apply for black memory...\r\n");
+        return -1;
+    }
+    printf("Paint_NewImage\r\n");
+    Paint_NewImage(BlackImage, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+    Paint_SelectImage(BlackImage);
+    Paint_SetMirroring(MIRROR_HORIZONTAL); //
+    Paint_Clear(WHITE);
+
+    // drawing
+
+    printf("Drawing\r\n");
+    // 1.Select Image
+    Paint_SelectImage(BlackImage);
+    Paint_Clear(WHITE);
+
+    // 2.Drawing on the image
+    uint8_t size = 2;
+    uint8_t padding = 0;
+
+    for (uint8_t y = 0; y < qrcode.size; y++)
+    {
+        for (uint8_t x = 0; x < qrcode.size; x++)
+        {
+            if (qrcode_getModule(&qrcode, x, y))
+            {
+                // printf("**");
+
+                // Paint_SetPixel(x * size, y * size, BLACK);
+
+                Paint_DrawRectangle(
+                    padding + (x * size),
+                    padding + (y * size),
+                    padding + ((x + 1) * size) - 1,
+                    padding + ((y + 1) * size),
+                    BLACK,
+                    DOT_PIXEL_1X1,
+                    DRAW_FILL_FULL);
+            }
+            else
+            {
+                // Paint_SetPixel(x * size, y * size, WHITE);
+                // printf("  ");
+            }
+
+            // printf("\n");
+        }
+    }
+
+    EPD_2IN13_V2_Display(BlackImage);
+    DEV_Delay_ms(10000);
+
+    // clear
+    printf("Clear...\r\n");
+
+    EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
+    EPD_2IN13_V2_Clear();
+    DEV_Delay_ms(2000); // Analog clock 1s
+
+    printf("Goto Sleep...\r\n");
+    EPD_2IN13_V2_Sleep();
+    free(BlackImage);
+    BlackImage = NULL;
+    DEV_Delay_ms(2000); // important, at least 2s
+    // close 5V
+    printf("close 5V, Module enters 0 power consumption ...\r\n");
+    DEV_Module_Exit();
+
+    // printf("e-Paper Init and Clear...\r\n");
+    // EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
+    // EPD_2IN13_V2_Clear();
+    // DEV_Delay_ms(500);
+
+    // EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
+    // EPD_2IN13_V2_Clear();
+    // DEV_Delay_ms(500);
+
+    // // Create a new image cache
+    // UBYTE *BlackImage;
+    // /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
+    // UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0) ? (EPD_2IN13_V2_WIDTH / 8) : (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
+    // if ((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL)
+    // {
+    //     printf("Failed to apply for black memory...\r\n");
+    //     return -1;
+    // }
+
+    // printf("Paint_NewImage\r\n");
+    // Paint_NewImage(BlackImage, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+    // Paint_SelectImage(BlackImage);
+    // Paint_SetMirroring(MIRROR_HORIZONTAL); //
+    // Paint_Clear(WHITE);
+
+    // printf("Drawing\r\n");
+    // // 1.Select Image
+    // Paint_SelectImage(BlackImage);
+    // Paint_Clear(WHITE);
+
+    // // 2.Drawing on the image
+    // Paint_DrawPoint(5, 10, BLACK, DOT_PIXEL_1X1, DOT_STYLE_DFT);
+    // Paint_DrawPoint(5, 25, BLACK, DOT_PIXEL_2X2, DOT_STYLE_DFT);
+    // Paint_DrawPoint(5, 40, BLACK, DOT_PIXEL_3X3, DOT_STYLE_DFT);
+    // Paint_DrawPoint(5, 55, BLACK, DOT_PIXEL_4X4, DOT_STYLE_DFT);
+
+    // // TODO, QRCODE
+
+    // EPD_2IN13_V2_Display(BlackImage);
+    // DEV_Delay_ms(2000);
+
+    /*
     // basic painting
 
     // copied in from example
@@ -33,7 +164,7 @@ int main()
 
     // Create a new image cache
     UBYTE *BlackImage;
-    /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
+    // you have to edit the startup_stm32fxxx.s file and set a big enough heap size
     UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0) ? (EPD_2IN13_V2_WIDTH / 8) : (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
     if ((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL)
     {
@@ -62,7 +193,8 @@ int main()
 
     Paint_DrawString_EN(140, 15, "wave?!", &Font16, BLACK, WHITE);
 
-    uint8_t size = 3;
+    uint8_t size = 2;
+    uint8_t padding = 5;
 
     for (uint8_t y = 0; y < qrcode.size; y++)
     {
@@ -75,10 +207,10 @@ int main()
                 // Paint_SetPixel(x * size, y * size, BLACK);
 
                 Paint_DrawRectangle(
-                    x * size,
-                    y * size,
-                    (x + 1) * size,
-                    (y + 1) * size,
+                    padding + (x * size),
+                    padding + (y * size),
+                    padding + ((x + 1) * size),
+                    padding + ((y + 1) * size),
                     BLACK,
                     DOT_PIXEL_1X1,
                     DRAW_FILL_FULL);
@@ -97,9 +229,11 @@ int main()
 
     DEV_Delay_ms(2000);
 
+    */
+
     // the actual example
 
-    EPD_2in13_V2_test();
+    // EPD_2in13_V2_test();
 
     // while (true) {
     //     printf("Hello, world!\n");
