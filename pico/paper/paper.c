@@ -42,22 +42,24 @@ float adc_to_temp(uint16_t raw_adc)
 #define MAX_SENSOR_READINGS 20
 uint16_t sensor_values[MAX_SENSOR_READINGS] = {0};
 
-// Helper to build the sensor data URL string
-void build_sensor_url(char *url_buf, size_t buf_size, uint16_t *values, int count)
+// Helper to build the sensor data URL string, now with counter
+void build_sensor_url(char *url_buf, size_t buf_size, uint16_t *values, int count, unsigned long count_val)
 {
     int offset = snprintf(url_buf, buf_size, "https://benjaminbenben.com/sensor?d=");
-    for (int i = 0; i < count; i++)
+    for (int j = 0; j < count; j++)
     {
-        offset += snprintf(url_buf + offset, buf_size - offset, "%u", values[i]);
-        if (i < count - 1)
+        offset += snprintf(url_buf + offset, buf_size - offset, "%u", values[j]);
+        if (j < count - 1)
         {
             offset += snprintf(url_buf + offset, buf_size - offset, ",");
         }
     }
+    // Add counter as &count=...
+    snprintf(url_buf + offset, buf_size - offset, "&c=%lu", count_val);
 }
 
-// Helper to display a QR code and temperature on the e-Paper display
-void display_qr_and_temp(const char *url, float temp)
+// Helper to display a QR code and temperature and counter on the e-Paper display
+void display_qr_and_temp(const char *url, float temp, unsigned long count)
 {
     // The structure to manage the QR code
     QRCode qrcode;
@@ -101,8 +103,13 @@ void display_qr_and_temp(const char *url, float temp)
 
     // Draw temperature string
     char temp_str[16];
-    snprintf(temp_str, sizeof(temp_str), "T:%.1f", temp);
+    snprintf(temp_str, sizeof(temp_str), "T:%.1f C", temp);
     Paint_DrawString_EN(130, 2, temp_str, &Font16, WHITE, BLACK);
+
+    // Draw counter string
+    char count_str[20];
+    snprintf(count_str, sizeof(count_str), "I:%lu", count);
+    Paint_DrawString_EN(130, 22, count_str, &Font16, WHITE, BLACK);
 
     EPD_2IN13_V2_Display(BlackImage);
     DEV_Delay_ms(1000); // Short delay to ensure display update
@@ -125,9 +132,11 @@ int main()
 
     int current_sensor_index = 0;
     char url_buf[256];
+    unsigned long count = 0;
 
     while (true)
     {
+        count++;
         // Read the current onboard temperature (raw value)
         uint16_t temp_raw = adc_read();
         float temp_c = adc_to_temp(temp_raw);
@@ -141,32 +150,32 @@ int main()
 
         // Print the current state of the sensor_values array
         printf("sensor_values array: [");
-        for (int i = 0; i < MAX_SENSOR_READINGS; i++)
+        for (int j = 0; j < MAX_SENSOR_READINGS; j++)
         {
-            printf("%u", sensor_values[i]);
-            if (i < MAX_SENSOR_READINGS - 1)
+            printf("%u", sensor_values[j]);
+            if (j < MAX_SENSOR_READINGS - 1)
             {
                 printf(",");
             }
         }
         printf("]\n");
 
-        // Build the URL with the most recent sensor readings (oldest to newest)
+        // Build the URL with the most recent sensor readings (oldest to newest) and counter
         int start = (current_sensor_index + 1) % MAX_SENSOR_READINGS;
         uint16_t ordered_values[MAX_SENSOR_READINGS];
-        for (int i = 0; i < MAX_SENSOR_READINGS; i++)
+        for (int j = 0; j < MAX_SENSOR_READINGS; j++)
         {
-            ordered_values[i] = sensor_values[(start + i) % MAX_SENSOR_READINGS];
+            ordered_values[j] = sensor_values[(start + j) % MAX_SENSOR_READINGS];
         }
-        build_sensor_url(url_buf, sizeof(url_buf), ordered_values, MAX_SENSOR_READINGS);
+        build_sensor_url(url_buf, sizeof(url_buf), ordered_values, MAX_SENSOR_READINGS, count);
 
         // Wake up and initialize the display
         EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
         EPD_2IN13_V2_Clear();
         DEV_Delay_ms(500);
 
-        // Display QR code and temperature
-        display_qr_and_temp(url_buf, temp_c);
+        // Display QR code, temperature, and counter
+        display_qr_and_temp(url_buf, temp_c, count);
 
         // Put the display to sleep for power saving
         EPD_2IN13_V2_Sleep();
