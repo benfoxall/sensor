@@ -33,6 +33,22 @@ project(paper C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+# ---- (from waveshare examples)
+
+# add a compilation subdirectory
+add_subdirectory(lib/Config)
+add_subdirectory(lib/e-Paper)
+add_subdirectory(lib/Fonts)
+add_subdirectory(lib/GUI)
+add_subdirectory(examples)
+
+# add a header directory
+include_directories(examples)
+include_directories(./lib/Config)
+include_directories(./lib/GUI)
+
+# ----
+
 # Add executable. Default name is the project name, version 0.1
 
 add_executable(paper paper.c )
@@ -54,9 +70,7 @@ target_include_directories(paper PRIVATE
 )
 
 # Add any user requested libraries
-target_link_libraries(paper 
-        
-        )
+target_link_libraries(paper examples ePaper GUI Fonts Config pico_stdlib hardware_spi)
 
 pico_add_extra_outputs(paper)
 
