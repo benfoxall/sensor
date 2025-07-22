@@ -1,13 +1,37 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "pico/stdlib.h"
+#include "hardware/adc.h"
 #include "EPD_Test.h" //Examples
 #include "qrcode.h"
 #include "lib/e-Paper/EPD_2in13_V2.h"
 
+float read_onboard_temperature()
+{
+    /* 12-bit conversion, assume max value == ADC_VREF == 3.3 V */
+    const float conversionFactor = 3.3f / (1 << 12); // 3.3V / 4096
+
+    // Read the raw ADC value
+    uint16_t raw_adc = adc_read();
+
+    // Convert raw ADC value to voltage
+    float adc_voltage = (float)raw_adc * conversionFactor;
+
+    // Convert voltage to temperature in Celsius using the datasheet formula
+    // T = 27 - (ADC_voltage - 0.706) / 0.001721
+    float tempC = 27.0f - (adc_voltage - 0.706f) / 0.001721f;
+
+    return tempC;
+}
+
 int main()
 {
+
     stdio_init_all();
+    // Initialize ADC and temperature sensor
+    adc_init();
+    adc_set_temp_sensor_enabled(true);
+    adc_select_input(4); // 4 is the internal temperature sensor
 
     // The structure to manage the QR code
     QRCode qrcode;
@@ -77,7 +101,12 @@ int main()
     }
 
     Paint_DrawString_EN(130, 2, "t=12345", &Font16, WHITE, BLACK);
-    Paint_DrawString_EN(130, 20, "data...", &Font16, WHITE, BLACK);
+
+    // Read temperature and display it (integer, short string)
+    int temp_int = (int)read_onboard_temperature();
+    char temp_str[16];
+    snprintf(temp_str, sizeof(temp_str), "T:%d", temp_int);
+    Paint_DrawString_EN(130, 20, temp_str, &Font16, WHITE, BLACK);
 
     EPD_2IN13_V2_Display(BlackImage);
     DEV_Delay_ms(10000);
