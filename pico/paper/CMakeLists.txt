@@ -64,7 +64,9 @@ pico_enable_stdio_usb(paper 0)
 
 # Add the standard library to the build
 target_link_libraries(paper
-        pico_stdlib)
+        pico_stdlib
+        hardware_adc
+)
 
 # Add the standard include files to the build
 target_include_directories(paper PRIVATE
