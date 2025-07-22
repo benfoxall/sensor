@@ -41,7 +41,7 @@ int main()
 
     // height = 122 114 = 4padd
 
-    // type 11 @ LOW = 57x57, 271 bytes
+    // type 10 @ LOW = 57x57, 271 bytes
 
     qrcode_initText(&qrcode, qrcodeBytes, 10, ECC_LOW, "https://benjaminbenben.com?q=123456789012345678901234567890123456789012345678901234567890");
 
