@@ -102,10 +102,10 @@ int main()
 
     Paint_DrawString_EN(130, 2, "t=12345", &Font16, WHITE, BLACK);
 
-    // Read temperature and display it (integer, short string)
-    int temp_int = (int)read_onboard_temperature();
+    // Read temperature and display it (one decimal place)
+    float temp = read_onboard_temperature();
     char temp_str[16];
-    snprintf(temp_str, sizeof(temp_str), "T:%d", temp_int);
+    snprintf(temp_str, sizeof(temp_str), "T:%.1f", temp);
     Paint_DrawString_EN(130, 20, temp_str, &Font16, WHITE, BLACK);
 
     EPD_2IN13_V2_Display(BlackImage);
