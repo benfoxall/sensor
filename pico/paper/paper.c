@@ -76,6 +76,9 @@ int main()
         }
     }
 
+    Paint_DrawString_EN(130, 2, "t=12345", &Font16, WHITE, BLACK);
+    Paint_DrawString_EN(130, 20, "data...", &Font16, WHITE, BLACK);
+
     EPD_2IN13_V2_Display(BlackImage);
     DEV_Delay_ms(10000);
 
