@@ -47,6 +47,7 @@ add_subdirectory(examples)
 include_directories(examples)
 include_directories(./lib/Config)
 include_directories(./lib/GUI)
+include_directories(./lib/QRCode)
 
 # ----
 
@@ -71,7 +72,7 @@ target_include_directories(paper PRIVATE
 )
 
 # Add any user requested libraries
-target_link_libraries(paper examples ePaper GUI Fonts Config pico_stdlib hardware_spi)
+target_link_libraries(paper examples ePaper GUI Fonts QRCode Config pico_stdlib hardware_spi)
 
 pico_add_extra_outputs(paper)
 
