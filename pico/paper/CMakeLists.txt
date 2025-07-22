@@ -40,6 +40,7 @@ add_subdirectory(lib/Config)
 add_subdirectory(lib/e-Paper)
 add_subdirectory(lib/Fonts)
 add_subdirectory(lib/GUI)
+add_subdirectory(lib/QRCode)
 add_subdirectory(examples)
 
 # add a header directory
