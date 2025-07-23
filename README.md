@@ -1,11 +1,17 @@
 # Sensor
 
-Collect data from an offline device with QR Codes.
+Share data from an offline device with QR Codes.
 
-[QR code -> Collector -> Backend]
+| Pico | Collector |
+| --- | --- |
+| ![pico](docs/pico.jpg) | ![collector](docs/collector.png)
 
 ## How it works
 
-The QR code contains the data as a query parameter
+Data collected on a [Raspberry Pi Pico][pico] is displayed on an [eInk Display](waveshare) encoded as a QRCode.
 
-https://benjaminbenben.com/sensor?d=2,4,1,5,1,2,5
+> `https://benjaminbenben.com/sensor/?d=x,y,z…`
+
+
+[pico]: (https://www.raspberrypi.com/products/raspberry-pi-pico/)
+[waveshare]: https://www.waveshare.com/wiki/Pico-ePaper-2.13
