@@ -10,13 +10,19 @@
         background-color: #333;
         color: #ccc;
       }
+      a {
+        color: inherit;
+      }
       #container {
         max-width: 40em;
         margin: 0 auto;
+        margin-left: 0;
         width: 100%;
         box-sizing: border-box;
-        padding: 0 1em;
         display: block;
+        background: #222;
+        padding: 1em;
+        border-radius: 5px;
       }
       svg {
         width: 100%;
@@ -26,7 +32,11 @@
     </style>
   </head>
   <body>
-    <h1>Sensor 🤳</h1>
+    <h1>Collector</h1>
+    <p>
+      This displays data collected from
+      <a href="https://github.com/benfoxall/sensor">sensor</a>
+    </p>
     <div id="container"></div>
     <script type="module">
       import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
@@ -51,6 +61,8 @@
         // Remove previous SVG if any
         container.innerHTML = "";
 
+        if (data.length === 0) return (container.innerHTML = "No data in url");
+
         // Get container width (fallback to 640 if not available)
         const containerWidth = container.offsetWidth || 640;
         const width = containerWidth;
@@ -58,7 +70,7 @@
         const marginTop = 20;
         const marginRight = 20;
         const marginBottom = 30;
-        const marginLeft = 40;
+        const marginLeft = 60;
 
         // X scale: index of data
         const x = d3
@@ -101,7 +113,7 @@
           .attr("x", -height / 2)
           .attr("y", 12)
           .attr("font-size", 16)
-          .attr('fill', 'currentColor')
+          .attr("fill", "currentColor")
           .text("°C");
 
         // Line generator
