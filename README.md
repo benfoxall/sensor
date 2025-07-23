@@ -13,5 +13,5 @@ Data collected on a [Raspberry Pi Pico][pico] is displayed on an [eInk Display](
 > `https://benjaminbenben.com/sensor/?d=x,y,z…`
 
 
-[pico]: (https://www.raspberrypi.com/products/raspberry-pi-pico/)
+[pico]: https://www.raspberrypi.com/products/raspberry-pi-pico/
 [waveshare]: https://www.waveshare.com/wiki/Pico-ePaper-2.13
