@@ -3,7 +3,7 @@ const ASSETS = [
     "./",
     "./index.html",
     "./sw.js",
-    "./d3.min.js"
+    "./d3.v7.min.js"
 ];
 
 self.addEventListener("install", (event) => {
